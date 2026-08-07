@@ -22,7 +22,7 @@ const [emergencyFilter, setEmergencyFilter] = useState("All");
 const [selectedTeams, setSelectedTeams] = useState({});
   const fetchRequests = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/sos");
+      const res = await fetch("https://resqai-final.onrender.com/api/sos");
       const data = await res.json();
       setRequests(data);
     } catch (error) {
