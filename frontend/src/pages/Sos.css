@@ -1,0 +1,58 @@
+.sos-container{
+    width:450px;
+    margin:40px auto;
+    padding:30px;
+    background:white;
+    border-radius:15px;
+    box-shadow:0 5px 20px rgba(0,0,0,.2);
+    text-align:center;
+}
+
+.sos-container h1{
+    margin-bottom:25px;
+}
+
+.sos-container input,
+.sos-container select,
+.sos-container textarea{
+    width:100%;
+    padding:12px;
+    margin:12px 0;
+    border:1px solid #ccc;
+    border-radius:8px;
+    font-size:16px;
+    box-sizing:border-box;
+}
+
+.location-btn{
+    width:100%;
+    padding:15px;
+    background:#2563eb;
+    color:white;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    margin-top:10px;
+    font-size:16px;
+}
+
+.location-btn:hover{
+    background:#1d4ed8;
+}
+
+.sos-button{
+    width:100%;
+    padding:18px;
+    margin-top:20px;
+    background:red;
+    color:white;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:20px;
+    font-weight:bold;
+}
+
+.sos-button:hover{
+    background:darkred;
+}

@@ -1,0 +1,40 @@
+.emergency-alert{
+    position:fixed;
+    top:20px;
+    left:50%;
+    transform:translateX(-50%);
+    width:80%;
+    max-width:700px;
+    z-index:9999;
+    animation:slideDown .5s ease;
+}
+
+.alert-box{
+    background:#dc3545;
+    color:white;
+    border-radius:15px;
+    padding:25px;
+    text-align:center;
+    box-shadow:0 10px 25px rgba(0,0,0,.4);
+}
+
+.alert-box h2{
+    font-size:30px;
+    margin-bottom:15px;
+}
+
+.alert-box p{
+    font-size:20px;
+}
+
+@keyframes slideDown{
+
+    from{
+        transform:translateY(-150%);
+    }
+
+    to{
+        transform:translateY(0);
+    }
+
+}
