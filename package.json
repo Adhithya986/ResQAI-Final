@@ -1,15 +1,16 @@
 {
   "name": "resqai",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
+  "description": "ResQAI - AI Disaster Response & Emergency Coordination Platform",
+    "start": "node backend/server.js",
     "build": "npm --prefix frontend install && npm --prefix frontend run build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "backend": "npm --prefix backend run dev",
+    "frontend": "npm --prefix frontend run dev"
   },
-  "keywords": [],
-  "type": "commonjs",
-  "dependencies": {
-    "react-router-dom": "^7.18.1"
-  }
+  "keywords": [
+    "disaster-response",
+    "emergency",
+    "ai",
+    "gemini"
+  ]
 }

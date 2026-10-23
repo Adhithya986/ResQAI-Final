@@ -42,10 +42,13 @@ function HomeMap() {
   const fetchSOS = async () => {
     try {
       const res = await fetch("http://localhost:5000/api/sos");
+      if (!res.ok) return;
       const data = await res.json();
-      setRequests(data);
+      if (Array.isArray(data)) {
+        setRequests(data);
+      }
     } catch (err) {
-      console.error(err);
+      console.error("HomeMap fetch error:", err);
     }
   };
 

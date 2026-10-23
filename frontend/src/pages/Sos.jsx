@@ -1,8 +1,5 @@
 import { useState, useRef } from "react";
 import "./Sos.css";
-
-const API_URL = "https://resqai-final.onrender.com";
-
 function Sos() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -12,114 +9,74 @@ function Sos() {
   const [status, setStatus] = useState("");
   const [image, setImage] = useState(null);
   const [isListening, setIsListening] = useState(false);
-  const [sending, setSending] = useState(false);
 
-  const recognitionRef = useRef(null);
+const recognitionRef = useRef(null);
 
-  // =========================
-  // GET LOCATION
-  // =========================
   const getLocation = () => {
     if (!navigator.geolocation) {
-      setStatus("❌ Geolocation is not supported.");
+      setStatus("Geolocation is not supported.");
       return;
     }
 
-    setStatus("📍 Getting your location...");
-
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const newLocation = {
+        setLocation({
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
-        };
+        });
 
-        setLocation(newLocation);
 
-        setStatus("📍 Location Retrieved Successfully!");
+
+        setStatus("📍 Location Retrieved Successfully");
       },
       (error) => {
-        console.error("Location Error:", error);
-
-        setStatus(
-          "❌ Unable to get location. Please allow location permission."
-        );
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0,
+        setStatus(error.message);
       }
     );
   };
 
-  // =========================
-  // VOICE SOS
-  // =========================
   const startListening = () => {
-    const SpeechRecognition =
-      window.SpeechRecognition ||
-      window.webkitSpeechRecognition;
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
 
-    if (!SpeechRecognition) {
-      alert(
-        "Speech Recognition is not supported in this browser."
-      );
-      return;
-    }
+  if (!SpeechRecognition) {
+    alert("Speech Recognition is not supported in this browser.");
+    return;
+  }
 
-    const recognition = new SpeechRecognition();
+  const recognition = new SpeechRecognition();
 
-    recognition.lang = "en-IN";
-    recognition.continuous = false;
-    recognition.interimResults = false;
+  recognition.lang = "en-IN";
+  recognition.continuous = false;
+  recognition.interimResults = false;
 
-    recognitionRef.current = recognition;
+  recognitionRef.current = recognition;
 
-    setIsListening(true);
+  setIsListening(true);
 
-    recognition.start();
+  recognition.start();
 
-    recognition.onresult = (event) => {
-      const transcript =
-        event.results[0][0].transcript;
+  recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript;
 
-      setDescription(transcript);
-
-      setStatus("🎤 Voice description captured!");
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-
-    recognition.onerror = (event) => {
-      console.error(
-        "Speech Recognition Error:",
-        event.error
-      );
-
-      setIsListening(false);
-
-      setStatus("❌ Voice recognition failed.");
-    };
+    setDescription(transcript);
   };
 
-  // =========================
-  // SEND SOS
-  // =========================
+  recognition.onend = () => {
+    setIsListening(false);
+  };
+
+  recognition.onerror = (event) => {
+    console.error(event.error);
+    setIsListening(false);
+  };
+};
+
   const sendSOS = async () => {
     if (!name || !phone || !emergency) {
-      alert(
-        "⚠️ Please fill Name, Phone Number and Emergency."
-      );
+      alert("Please fill all required fields.");
       return;
     }
-
-    if (sending) return;
-
-    setSending(true);
-    setStatus("🚨 Sending SOS...");
 
     const formData = new FormData();
 
@@ -129,10 +86,7 @@ function Sos() {
     formData.append("description", description);
 
     if (location) {
-      formData.append(
-        "location",
-        JSON.stringify(location)
-      );
+      formData.append("location", JSON.stringify(location));
     }
 
     if (image) {
@@ -140,63 +94,29 @@ function Sos() {
     }
 
     try {
-      const response = await fetch(
-        `${API_URL}/api/sos`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          `Server Error: ${response.status}`
-        );
-      }
+      const response = await fetch("http://localhost:5000/api/sos", {
+        method: "POST",
+        body: formData,
+      });
 
       const data = await response.json();
 
-      console.log("SOS Response:", data);
+      alert(data.message);
 
-      if (data.success) {
-        alert(
-          "🚨 SOS SENT SUCCESSFULLY!\n\nRescue teams have been notified."
-        );
+      console.log(data);
 
-        // Reset form
-        setName("");
-        setPhone("");
-        setEmergency("");
-        setDescription("");
-        setLocation(null);
-        setImage(null);
-        setStatus("✅ SOS Sent Successfully!");
-      } else {
-        alert(
-          data.message ||
-            "❌ Unable to send SOS."
-        );
+      // Reset form
+      setName("");
+      setPhone("");
+      setEmergency("");
+      setDescription("");
+      setLocation(null);
+      setImage(null);
+      setStatus("");
 
-        setStatus(
-          data.message ||
-            "❌ Unable to send SOS."
-        );
-      }
     } catch (error) {
-      console.error(
-        "❌ SOS Error:",
-        error
-      );
-
-      alert(
-        "❌ Unable to connect to ResQAI server."
-      );
-
-      setStatus(
-        "❌ Server connection failed."
-      );
-    } finally {
-      setSending(false);
+      console.error(error);
+      alert("❌ Unable to connect to backend.");
     }
   };
 
@@ -205,126 +125,64 @@ function Sos() {
 
       <h2>🚨 Emergency SOS</h2>
 
-      {/* NAME */}
-
       <input
         type="text"
         placeholder="Full Name"
         value={name}
-        onChange={(e) =>
-          setName(e.target.value)
-        }
+        onChange={(e) => setName(e.target.value)}
       />
-
-      {/* PHONE */}
 
       <input
-        type="tel"
+        type="text"
         placeholder="Phone Number"
         value={phone}
-        onChange={(e) =>
-          setPhone(e.target.value)
-        }
+        onChange={(e) => setPhone(e.target.value)}
       />
-
-      {/* EMERGENCY */}
 
       <select
         value={emergency}
-        onChange={(e) =>
-          setEmergency(e.target.value)
-        }
+        onChange={(e) => setEmergency(e.target.value)}
       >
-        <option value="">
-          Select Emergency
-        </option>
-
-        <option value="Flood">
-          Flood
-        </option>
-
-        <option value="Fire">
-          Fire
-        </option>
-
-        <option value="Earthquake">
-          Earthquake
-        </option>
-
-        <option value="Accident">
-          Accident
-        </option>
-
-        <option value="Medical Emergency">
-          Medical Emergency
-        </option>
+        <option value="">Select Emergency</option>
+        <option>Flood</option>
+        <option>Fire</option>
+        <option>Earthquake</option>
+        <option>Accident</option>
+        <option>Medical Emergency</option>
       </select>
-
-      {/* DESCRIPTION */}
 
       <textarea
         rows="5"
         placeholder="Describe your emergency..."
         value={description}
-        onChange={(e) =>
-          setDescription(e.target.value)
-        }
+        onChange={(e) => setDescription(e.target.value)}
       />
-
-      {/* VOICE */}
-
-      <div
-        style={{
-          marginTop: "10px",
-          marginBottom: "20px",
-        }}
-      >
-        <button
-          type="button"
-          onClick={startListening}
-          disabled={isListening}
-          className={
-            isListening
-              ? "location-btn"
-              : "sos-button"
-          }
-        >
-          {isListening
-            ? "🎙 Listening..."
-            : "🎤 Voice SOS"}
-        </button>
-      </div>
-
-      {/* IMAGE */}
-
-      <h4>
-        📷 Upload Disaster Image
-      </h4>
+<div style={{ marginTop: "10px", marginBottom: "20px" }}>
+  <button
+    type="button"
+    onClick={startListening}
+    className={isListening ? "location-btn" : "sos-button"}
+  >
+    {isListening ? "🎙 Listening..." : "🎤 Voice SOS"}
+  </button>
+</div>
+      <h4>📷 Upload Disaster Image</h4>
 
       <input
         type="file"
         accept="image/*"
-        onChange={(e) =>
-          setImage(e.target.files[0])
-        }
+        onChange={(e) => setImage(e.target.files[0])}
       />
 
-      {/* IMAGE PREVIEW */}
-
       {image && (
-        <div
-          style={{
-            marginTop: "15px",
-          }}
-        >
+        <div style={{ marginTop: "15px" }}>
           <img
             src={URL.createObjectURL(image)}
-            alt="Disaster Preview"
+            alt="Preview"
             width="300"
             style={{
               borderRadius: "10px",
               border: "2px solid #ddd",
-              maxWidth: "100%",
             }}
           />
         </div>
@@ -332,10 +190,7 @@ function Sos() {
 
       <br />
 
-      {/* LOCATION */}
-
       <button
-        type="button"
         className="location-btn"
         onClick={getLocation}
       >
@@ -343,43 +198,20 @@ function Sos() {
       </button>
 
       {location && (
-        <div className="mt-3">
-
-          <p>
-            <strong>
-              Latitude:
-            </strong>{" "}
-            {location.latitude}
-          </p>
-
-          <p>
-            <strong>
-              Longitude:
-            </strong>{" "}
-            {location.longitude}
-          </p>
-
-        </div>
+        <>
+          <p><strong>Latitude:</strong> {location.latitude}</p>
+          <p><strong>Longitude:</strong> {location.longitude}</p>
+        </>
       )}
-
-      {/* SEND SOS */}
 
       <button
-        type="button"
         className="sos-button"
         onClick={sendSOS}
-        disabled={sending}
       >
-        {sending
-          ? "⏳ SENDING SOS..."
-          : "🚨 SEND SOS"}
+        🚨 SEND SOS
       </button>
 
-      {/* STATUS */}
-
-      {status && (
-        <h3>{status}</h3>
-      )}
+      <h3>{status}</h3>
 
     </div>
   );

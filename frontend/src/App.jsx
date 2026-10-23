@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 import Home from "./pages/Home";
 import About from "./pages/About";
@@ -26,10 +27,35 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/sos" element={<Sos />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/rescue-dashboard" element={<RescueDashboard />} />
-      <Route path="/broadcast" element={<Broadcast />} 
-      /></Routes>
+
+        {/* Protected Admin Routes */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute allowedRole="Admin">
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/broadcast"
+          element={
+            <ProtectedRoute allowedRole="Admin">
+              <Broadcast />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Protected Rescue Route */}
+        <Route
+          path="/rescue-dashboard"
+          element={
+            <ProtectedRoute allowedRole="Rescue">
+              <RescueDashboard />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
     </>
   );
 }

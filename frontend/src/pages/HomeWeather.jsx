@@ -4,7 +4,8 @@ function HomeWeather() {
   const [city, setCity] = useState("");
   const [weather, setWeather] = useState(null);
 
-  const API_KEY = "YOUR_API_KEY";
+  const API_KEY =
+    import.meta.env.VITE_OPENWEATHER_API_KEY || "0e9ab7820a52474577cc967aa1044fa8";
 
   const getWeather = async () => {
     if (!city) return;

@@ -71,8 +71,7 @@ function Home() {
 
       <HomeWeather />
 
-      {/* Uncomment after Google Maps API is ready */}
-      {/* <HomeMap /> */}
+      <HomeMap />
 
       <section className="features">
         <h2>Our Features</h2>

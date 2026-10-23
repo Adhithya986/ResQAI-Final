@@ -6,55 +6,78 @@ const SOS = require("../models/Sos");
 const upload = require("../middleware/upload");
 
 console.log("✅ SOS Routes Loaded");
-
 // =====================================
-// CREATE SOS (WITH IMAGE)
+// CREATE SOS
 // =====================================
 
 router.post("/", upload.single("image"), async (req, res) => {
   try {
-
+    console.log("=================================");
+    console.log("🚨 SOS REQUEST RECEIVED");
     console.log("BODY:", req.body);
-console.log("FILE:", req.file);
+    console.log("FILE:", req.file);
+    console.log("=================================");
 
-let aiAnalysis = "";
+    let aiAnalysis = "";
 
-if (req.file) {
-  console.log("🤖 Analyzing image with Gemini...");
+    // Only analyze image if one was uploaded
+    if (req.file) {
+      console.log("🤖 Image received:", req.file.filename);
 
-  aiAnalysis = await analyzeImage(req.file.filename);
+      try {
+        aiAnalysis = await analyzeImage(req.file.filename);
+        console.log("✅ AI Analysis completed");
+      } catch (aiError) {
+        console.error("⚠️ Gemini Analysis Failed:");
+        console.error(aiError);
 
-  console.log(aiAnalysis);
-}
+        // Don't stop SOS because AI failed
+        aiAnalysis = "AI analysis unavailable.";
+      }
+    }
 
-    const sos = new SOS();
+    const body = req.body || {};
 
-sos.name = req.body.name;
-sos.phone = req.body.phone;
-sos.emergency = req.body.emergency;
-sos.description = req.body.description;
+    if (!body.name || !body.phone || !body.emergency) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields: name, phone, emergency",
+      });
+    }
 
-sos.location = req.body.location
-  ? JSON.parse(req.body.location)
-  : null;
+    // Create SOS
+    const sos = new SOS({
+      name: body.name,
+      phone: body.phone,
+      emergency: body.emergency,
+      description: body.description || "",
 
-sos.image = req.file ? req.file.filename : "";
+      location: body.location
+        ? typeof body.location === "string"
+          ? JSON.parse(body.location)
+          : body.location
+        : null,
 
-sos.aiAnalysis = aiAnalysis;
+      image: req.file ? req.file.filename : "",
+      aiAnalysis: aiAnalysis,
+      status: "Pending",
+    });
 
-sos.status = "Pending";
+    console.log("💾 Saving SOS to MongoDB...");
+    console.log(sos.toObject());
 
-    console.log("Image filename:", req.file?.filename);
-console.log("Image value:", sos.image);
-console.log("AI Analysis value:", sos.aiAnalysis);
-console.log("SOS object before save:", sos.toObject());
+    await sos.save();
 
-await sos.save();
-const io = req.app.get("io");
+    console.log("✅ SOS SAVED TO MONGODB");
+    console.log("ID:", sos._id);
 
-io.emit("newSOS", sos);
+    // Send realtime notification
+    const io = req.app.get("io");
 
-console.log("SOS object after save:", sos.toObject());
+    if (io) {
+      io.emit("newSOS", sos);
+      console.log("📡 newSOS broadcast sent");
+    }
 
     res.status(201).json({
       success: true,
@@ -63,11 +86,14 @@ console.log("SOS object after save:", sos.toObject());
     });
 
   } catch (error) {
+
+    console.error("❌ SOS SAVE ERROR:");
     console.error(error);
 
     res.status(500).json({
       success: false,
       message: "Server Error",
+      error: error.message,
     });
   }
 });
@@ -113,6 +139,11 @@ router.put("/:id", async (req, res) => {
         success: false,
         message: "SOS Request Not Found",
       });
+    }
+
+    const io = req.app.get("io");
+    if (io) {
+      io.emit("sosUpdated", updatedSOS);
     }
 
     res.json({
@@ -178,6 +209,11 @@ router.put("/:id/assign", async (req, res) => {
         success: false,
         message: "SOS Not Found",
       });
+    }
+
+    const io = req.app.get("io");
+    if (io) {
+      io.emit("sosAssigned", sos);
     }
 
     res.json({

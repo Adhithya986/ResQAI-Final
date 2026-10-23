@@ -78,7 +78,7 @@ router.post("/login", async (req, res) => {
         id: user._id,
         role: user.role,
       },
-      "resqai_secret_key",
+      process.env.JWT_SECRET || "resqai_secret_key",
       {
         expiresIn: "1d",
       }
@@ -101,6 +101,24 @@ router.post("/login", async (req, res) => {
   } catch (error) {
     console.error(error);
 
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+});
+
+// =========================
+// GET ALL RESCUE TEAMS
+// =========================
+router.get("/teams", async (req, res) => {
+  try {
+    const teams = await User.find({ role: "Rescue" }).select("name email team");
+    res.json({
+      success: true,
+      teams,
+    });
+  } catch (error) {
     res.status(500).json({
       success: false,
       message: "Server Error",

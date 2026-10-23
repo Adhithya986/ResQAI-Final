@@ -1,31 +1,40 @@
-console.log("✅ aiService.js loaded");
-const { InferenceClient } = require("@huggingface/inference");
+require("dotenv").config();
 const fs = require("fs");
 const path = require("path");
+const geminiService = require("./geminiService");
 
-const client = new InferenceClient(process.env.HF_TOKEN);
+let client = null;
+try {
+  const { InferenceClient } = require("@huggingface/inference");
+  if (process.env.HF_TOKEN) {
+    client = new InferenceClient(process.env.HF_TOKEN);
+  }
+} catch {
+  // @huggingface/inference optional
+}
 
 async function analyzeImage(filename) {
   try {
-    const imagePath = path.join(__dirname, "..", "uploads", filename);
+    if (client) {
+      const imagePath = path.join(__dirname, "..", "uploads", filename);
+      if (fs.existsSync(imagePath)) {
+        const imageBuffer = fs.readFileSync(imagePath);
+        const result = await client.imageClassification({
+          model: "google/vit-base-patch16-224",
+          data: imageBuffer,
+        });
+        return result;
+      }
+    }
 
-    const imageBuffer = fs.readFileSync(imagePath);
-
-    const result = await client.imageClassification({
-      model: "google/vit-base-patch16-224",
-      data: imageBuffer,
-    });
-
-    return result;
+    // Default to Gemini analysis
+    return await geminiService.analyzeImage(filename);
   } catch (error) {
-    console.error("AI Error:", error);
+    console.error("AI Error:", error.message || error);
     return null;
   }
 }
 
 module.exports = {
   analyzeImage,
-
-};
-
-console.log("✅ Exporting:", module.exports);
+};

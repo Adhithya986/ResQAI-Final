@@ -18,3 +18,9 @@ build/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Archives & Uploads
+*.zip
+*.db*
+backend/uploads/*
+!backend/uploads/.gitkeep

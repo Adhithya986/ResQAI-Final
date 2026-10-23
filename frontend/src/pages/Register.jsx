@@ -22,17 +22,19 @@ function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (formData.role === "Rescue" && !formData.team) {
+      alert("Please select or enter your Rescue Team name.");
+      return;
+    }
+
     try {
-      const response = await fetch(
-        "http://localhost:5000/api/users/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+      const response = await fetch("http://localhost:5000/api/users/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
       const data = await response.json();
 
@@ -47,101 +49,114 @@ function Register() {
           team: "",
         });
 
+        // Redirect to Login Page
         navigate("/login");
       } else {
-        alert(data.message);
+        alert(data.message || "Registration failed");
       }
     } catch (error) {
       console.error(error);
-      alert("❌ Registration Failed");
+      alert("❌ Registration Failed. Make sure the backend server is running.");
     }
   };
 
   return (
-    <div className="container mt-5">
-      <div
-        className="card shadow p-4 mx-auto"
-        style={{ maxWidth: "500px" }}
-      >
-        <h2 className="text-center mb-4">
-          📝 Register
-        </h2>
+    <div className="container mt-5 pb-5">
+      <div className="card p-4 shadow mx-auto" style={{ maxWidth: "500px" }}>
+        <h2 className="text-center mb-4">📝 Register for ResQAI</h2>
 
         <form onSubmit={handleSubmit}>
-
-          <input
-            className="form-control mb-3"
-            type="text"
-            name="name"
-            placeholder="Full Name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
-
-          <input
-            className="form-control mb-3"
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-
-          <input
-            className="form-control mb-3"
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-
-          <select
-            className="form-select mb-3"
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-          >
-           <option value="Citizen">Citizen</option>
-<option value="Rescue">Rescue Team</option>
-<option value="Admin">Admin</option>
-          </select>
-
-          {formData.role === "Rescue" && (
-            <select
-              className="form-select mb-3"
-              name="team"
-              value={formData.team}
+          <div className="mb-3">
+            <label className="form-label fw-bold">Full Name</label>
+            <input
+              className="form-control"
+              type="text"
+              name="name"
+              placeholder="e.g. John Doe"
+              value={formData.name}
               onChange={handleChange}
               required
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label fw-bold">Email Address</label>
+            <input
+              className="form-control"
+              type="email"
+              name="email"
+              placeholder="name@example.com"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label fw-bold">Password</label>
+            <input
+              className="form-control"
+              type="password"
+              name="password"
+              placeholder="Create a strong password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="mb-3">
+            <label className="form-label fw-bold">Account Role</label>
+            <select
+              className="form-select"
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
             >
-              <option value="">Select Rescue Team</option>
-              <option value="Team Alpha">Team Alpha</option>
-              <option value="Team Bravo">Team Bravo</option>
-              <option value="Team Charlie">Team Charlie</option>
-              <option value="Fire Team">Fire Team</option>
-              <option value="Medical Team">Medical Team</option>
-              <option value="Police Team">Police Team</option>
+              <option value="Citizen">Citizen (Request Emergency SOS)</option>
+              <option value="Rescue">Rescue Team (Respond to Missions)</option>
+              <option value="Admin">Admin (Control Center & Dispatch)</option>
             </select>
+          </div>
+
+          {formData.role === "Rescue" && (
+            <div className="mb-3 p-3 bg-light rounded border border-primary">
+              <label className="form-label fw-bold text-primary">
+                🚑 Select Your Rescue Team Unit
+              </label>
+              <select
+                className="form-select mb-2"
+                name="team"
+                value={formData.team}
+                onChange={handleChange}
+                required
+              >
+                <option value="">-- Choose Assigned Team --</option>
+                <option value="Team Alpha">🚑 Team Alpha (Rapid Response)</option>
+                <option value="Team Bravo">🚑 Team Bravo (Evacuation)</option>
+                <option value="Team Charlie">🚑 Team Charlie (Search & Rescue)</option>
+                <option value="Fire Team">🚒 Fire Team (Fire & Hazard)</option>
+                <option value="Medical Team">🏥 Medical Team (First Aid & Trauma)</option>
+                <option value="Police Team">🚓 Police Team (Law & Traffic)</option>
+              </select>
+              <small className="text-muted">
+                Admins dispatch emergency missions to these exact team units.
+              </small>
+            </div>
           )}
 
-          <button
-            type="submit"
-            className="btn btn-primary w-100"
-          >
-            Register
+          <button type="submit" className="btn btn-primary w-100 py-2 fw-bold">
+            Create Account
           </button>
-
         </form>
 
         <hr />
 
         <p className="text-center mb-0">
           Already have an account?{" "}
-          <Link to="/login">Login Here</Link>
+          <Link to="/login" className="fw-bold">
+            Login Here
+          </Link>
         </p>
       </div>
     </div>

@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 
+const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY || "0e9ab7820a52474577cc967aa1044fa8";
+
 function HomeWeather() {
   const [weather, setWeather] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
-
   useEffect(() => {
     if (!navigator.geolocation) {
-      setError("Geolocation is not supported.");
+      setError("Geolocation is not supported by your browser.");
       setLoading(false);
       return;
     }
