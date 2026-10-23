@@ -1,9 +1,8 @@
 import WeatherCard from "../components/WeatherCard";
 import { useEffect, useState } from "react";
 import LiveMap from "../components/maps/LiveMap";
-import { io } from "socket.io-client";
-
-const socket = io("http://localhost:5000");
+import socket from "../services/socket";
+import { getApiUrl, getUploadUrl } from "../services/api";
 
 function Dashboard() {
   const [requests, setRequests] = useState([]);
@@ -23,9 +22,7 @@ function Dashboard() {
     try {
       console.log("📡 Fetching SOS requests...");
 
-      const res = await fetch(
-        "http://localhost:5000/api/sos"
-      );
+      const res = await fetch(getApiUrl("/api/sos"));
 
       console.log("GET /api/sos status:", res.status);
 
@@ -52,7 +49,7 @@ function Dashboard() {
       console.log("🔄 Updating status:", id, status);
 
       const res = await fetch(
-        `http://localhost:5000/api/sos/${id}`,
+        getApiUrl(`/api/sos/${id}`),
         {
           method: "PUT",
           headers: {
@@ -98,7 +95,7 @@ function Dashboard() {
       console.log("🚑 Assigning team:", assignedTo);
 
       const res = await fetch(
-        `http://localhost:5000/api/sos/${id}/assign`,
+        getApiUrl(`/api/sos/${id}/assign`),
         {
           method: "PUT",
           headers: {
@@ -526,7 +523,7 @@ function Dashboard() {
                 {item.image ? (
 
                   <img
-                    src={`http://localhost:5000/uploads/${item.image}`}
+                    src={getUploadUrl(item.image)}
                     alt="Disaster"
                     className="img-fluid rounded shadow"
                     style={{
@@ -535,9 +532,7 @@ function Dashboard() {
                       cursor: "pointer",
                     }}
                     onClick={() =>
-                      setSelectedImage(
-                        `http://localhost:5000/uploads/${item.image}`
-                      )
+                      setSelectedImage(getUploadUrl(item.image))
                     }
                   />
 

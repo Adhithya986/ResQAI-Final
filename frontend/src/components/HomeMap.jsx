@@ -6,9 +6,9 @@ import L from "leaflet";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
-import { io } from "socket.io-client";
+import socket from "../services/socket";
+import { getApiUrl } from "../services/api";
 
-const socket = io("http://localhost:5000");
 delete L.Icon.Default.prototype._getIconUrl;
 
 L.Icon.Default.mergeOptions({
@@ -41,7 +41,7 @@ function HomeMap() {
 
   const fetchSOS = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/sos");
+      const res = await fetch(getApiUrl("/api/sos"));
       if (!res.ok) return;
       const data = await res.json();
       if (Array.isArray(data)) {

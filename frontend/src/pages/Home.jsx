@@ -1,13 +1,11 @@
 import "./Home.css";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import io from "socket.io-client";
 
 import HomeWeather from "../components/HomeWeather";
 import HomeMap from "../components/HomeMap";
 import EmergencyAlert from "../components/EmergencyAlert";
-
-const socket = io("http://localhost:5000");
+import socket from "../services/socket";
 
 function Home() {
   const navigate = useNavigate();

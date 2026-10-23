@@ -1,8 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
-import { io } from "socket.io-client";
 import WeatherCard from "../components/WeatherCard";
-
-const socket = io("http://localhost:5000");
+import socket from "../services/socket";
+import { getApiUrl, getUploadUrl } from "../services/api";
 
 function RescueDashboard() {
   const [requests, setRequests] = useState([]);
@@ -29,7 +28,7 @@ function RescueDashboard() {
     try {
       setLoading(true);
       const res = await fetch(
-        `http://localhost:5000/api/sos/team/${encodeURIComponent(team)}`
+        getApiUrl(`/api/sos/team/${encodeURIComponent(team)}`)
       );
 
       if (!res.ok) {
@@ -67,7 +66,7 @@ function RescueDashboard() {
   // Complete Rescue
   const completeRescue = async (id) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/sos/${id}`, {
+      const response = await fetch(getApiUrl(`/api/sos/${id}`), {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -182,7 +181,7 @@ function RescueDashboard() {
                 <div className="col-md-5 text-center">
                   {item.image ? (
                     <img
-                      src={`http://localhost:5000/uploads/${item.image}`}
+                      src={getUploadUrl(item.image)}
                       alt="Disaster Scene"
                       className="img-fluid rounded shadow"
                       style={{

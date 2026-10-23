@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import "./Sos.css";
+import { getApiUrl } from "../services/api";
 function Sos() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -94,7 +95,7 @@ const recognitionRef = useRef(null);
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/sos", {
+      const response = await fetch(getApiUrl("/api/sos"), {
         method: "POST",
         body: formData,
       });

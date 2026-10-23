@@ -2,6 +2,7 @@
   "name": "resqai",
   "version": "1.0.0",
   "description": "ResQAI - AI Disaster Response & Emergency Coordination Platform",
+  "scripts": {
     "start": "node backend/server.js",
     "build": "npm --prefix frontend install && npm --prefix frontend run build",
     "backend": "npm --prefix backend run dev",
