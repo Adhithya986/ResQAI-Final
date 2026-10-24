@@ -226,28 +226,40 @@ function RescueDashboard() {
                 />
               )}
 
-              <div className="d-flex gap-2 mt-3">
+              <div className="d-flex flex-column flex-sm-row gap-2 mt-3">
+                {item.phone && (
+                  <a
+                    href={`tel:${item.phone}`}
+                    className="btn btn-outline-primary d-flex align-items-center justify-content-center gap-1"
+                    style={{ minHeight: "48px", fontWeight: 700 }}
+                  >
+                    📞 Call Victim ({item.phone})
+                  </a>
+                )}
+
                 {item.location?.latitude && item.location?.longitude ? (
                   <button
-                    className="btn btn-primary"
+                    className="btn btn-primary d-flex align-items-center justify-content-center gap-1"
+                    style={{ minHeight: "48px", fontWeight: 700 }}
                     onClick={() =>
                       window.open(
-                        `https://www.google.com/maps?q=${item.location.latitude},${item.location.longitude}`,
+                        `https://www.google.com/maps/dir/?api=1&destination=${item.location.latitude},${item.location.longitude}`,
                         "_blank"
                       )
                     }
                   >
-                    🗺️ Open in Google Maps
+                    🗺️ Navigate in Maps
                   </button>
                 ) : (
-                  <button className="btn btn-secondary" disabled>
+                  <button className="btn btn-secondary" disabled style={{ minHeight: "48px" }}>
                     📍 No GPS Location
                   </button>
                 )}
 
                 {item.status !== "Completed" && (
                   <button
-                    className="btn btn-success"
+                    className="btn btn-success d-flex align-items-center justify-content-center gap-1"
+                    style={{ minHeight: "48px", fontWeight: 700 }}
                     onClick={() => completeRescue(item._id)}
                   >
                     ✔ Mark Mission Completed

@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
+import BottomNav from "./components/BottomNav";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 import Home from "./pages/Home";
@@ -56,6 +57,8 @@ function App() {
           }
         />
       </Routes>
+
+      <BottomNav />
     </>
   );
 }

@@ -63,9 +63,12 @@ function HomeMap() {
         <MapContainer
           center={[17.385, 78.4867]}
           zoom={7}
+          scrollWheelZoom={false}
           style={{
-            height: "500px",
+            height: "clamp(300px, 48vh, 480px)",
             width: "100%",
+            borderRadius: "12px",
+            zIndex: 1,
           }}
         >
           <TileLayer
@@ -85,19 +88,59 @@ function HomeMap() {
                 ]}
               >
                 <Popup>
-
-                  <h5>🚨 {item.emergency}</h5>
-
-                  <p><b>Name:</b> {item.name}</p>
-
-                  <p><b>Phone:</b> {item.phone}</p>
-
-                  <p><b>Status:</b> {item.status}</p>
-
-                  <p><b>Assigned:</b> {item.assignedTo || "Not Assigned"}</p>
-
-                  <p>{item.description}</p>
-
+                  <div style={{ minWidth: "180px", maxWidth: "240px", fontSize: "0.9rem" }}>
+                    <h5 style={{ margin: "0 0 6px", color: "#dc2626", fontWeight: 700 }}>
+                      🚨 {item.emergency}
+                    </h5>
+                    <p style={{ margin: "4px 0" }}><b>Name:</b> {item.name}</p>
+                    <p style={{ margin: "4px 0" }}>
+                      <b>Phone:</b>{" "}
+                      <a href={`tel:${item.phone}`} style={{ color: "#2563eb", fontWeight: 600 }}>
+                        📞 {item.phone}
+                      </a>
+                    </p>
+                    <p style={{ margin: "4px 0" }}>
+                      <b>Status:</b>{" "}
+                      <span
+                        style={{
+                          background: item.status === "Rescued" ? "#dcfce7" : "#fee2e2",
+                          color: item.status === "Rescued" ? "#166534" : "#991b1b",
+                          padding: "2px 6px",
+                          borderRadius: "4px",
+                          fontSize: "0.78rem",
+                          fontWeight: 600,
+                        }}
+                      >
+                        {item.status}
+                      </span>
+                    </p>
+                    {item.description && (
+                      <p style={{ margin: "6px 0", fontSize: "0.82rem", color: "#475569" }}>
+                        {item.description}
+                      </p>
+                    )}
+                    <a
+                      href={`https://www.google.com/maps/dir/?api=1&destination=${item.location.latitude},${item.location.longitude}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: "inline-block",
+                        marginTop: "8px",
+                        background: "#2563eb",
+                        color: "white",
+                        padding: "6px 12px",
+                        borderRadius: "6px",
+                        textDecoration: "none",
+                        fontSize: "0.82rem",
+                        fontWeight: 600,
+                        width: "100%",
+                        textAlign: "center",
+                        boxSizing: "border-box",
+                      }}
+                    >
+                      🗺️ Open in Google Maps
+                    </a>
+                  </div>
                 </Popup>
               </Marker>
             );

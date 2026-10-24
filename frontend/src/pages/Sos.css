@@ -1,58 +1,285 @@
-.sos-container{
-    width:450px;
-    margin:40px auto;
-    padding:30px;
-    background:white;
-    border-radius:15px;
-    box-shadow:0 5px 20px rgba(0,0,0,.2);
-    text-align:center;
+.sos-page-wrapper {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 16px;
+  box-sizing: border-box;
 }
 
-.sos-container h1{
-    margin-bottom:25px;
+@media (min-width: 768px) {
+  .sos-page-wrapper {
+    padding: 30px 20px;
+  }
 }
 
-.sos-container input,
-.sos-container select,
-.sos-container textarea{
-    width:100%;
-    padding:12px;
-    margin:12px 0;
-    border:1px solid #ccc;
-    border-radius:8px;
-    font-size:16px;
-    box-sizing:border-box;
+.sos-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 22px 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(226, 232, 240, 0.8);
 }
 
-.location-btn{
-    width:100%;
-    padding:15px;
-    background:#2563eb;
-    color:white;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-    margin-top:10px;
-    font-size:16px;
+@media (min-width: 768px) {
+  .sos-card {
+    padding: 35px 30px;
+  }
 }
 
-.location-btn:hover{
-    background:#1d4ed8;
+/* Header */
+.sos-header {
+  text-align: center;
+  margin-bottom: 24px;
 }
 
-.sos-button{
-    width:100%;
-    padding:18px;
-    margin-top:20px;
-    background:red;
-    color:white;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-    font-size:20px;
-    font-weight:bold;
+.sos-header h1 {
+  font-size: 1.85rem;
+  color: #dc2626;
+  margin-bottom: 6px;
+  font-weight: 800;
 }
 
-.sos-button:hover{
-    background:darkred;
+@media (min-width: 768px) {
+  .sos-header h1 {
+    font-size: 2.3rem;
+  }
+}
+
+.sos-header p {
+  color: #64748b;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* Quick Emergency Type Grid */
+.emergency-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+@media (min-width: 480px) {
+  .emergency-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.emergency-chip {
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 68px;
+  text-align: center;
+  touch-action: manipulation;
+}
+
+.emergency-chip:active {
+  transform: scale(0.96);
+}
+
+.emergency-chip.selected {
+  background: #fef2f2;
+  border-color: #ef4444;
+  color: #b91c1c;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+.emergency-chip .icon {
+  font-size: 1.6rem;
+  margin-bottom: 4px;
+}
+
+.emergency-chip .label {
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+/* Form Controls */
+.sos-input-group {
+  margin-bottom: 16px;
+}
+
+.sos-input-group label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: #334155;
+  margin-bottom: 6px;
+}
+
+.sos-input {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 1rem;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  outline: none;
+  background: #f8fafc;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.sos-input:focus {
+  border-color: #2563eb;
+  background: #ffffff;
+}
+
+/* Voice SOS Button */
+.voice-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: 2px dashed #93c5fd;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 8px;
+}
+
+.voice-btn.listening {
+  background: #fee2e2;
+  border-color: #ef4444;
+  color: #dc2626;
+  animation: pulse-border 1.5s infinite;
+}
+
+@keyframes pulse-border {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+/* Camera Capture Box */
+.camera-upload-box {
+  background: #f8fafc;
+  border: 2px dashed #cbd5e1;
+  border-radius: 14px;
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.2s;
+}
+
+.camera-upload-box:hover {
+  border-color: #2563eb;
+}
+
+.camera-upload-box input[type="file"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* GPS Location Banner */
+.gps-banner {
+  background: #f0fdf4;
+  border: 1.5px solid #86efac;
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.gps-banner.loading {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.gps-banner.error {
+  background: #fef2f2;
+  border-color: #fca5a5;
+}
+
+.gps-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.88rem;
+}
+
+/* Massive Submit Button */
+.sos-submit-btn {
+  width: 100%;
+  padding: 18px;
+  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: transform 0.15s, box-shadow 0.15s;
+  min-height: 60px;
+}
+
+.sos-submit-btn:active {
+  transform: scale(0.98);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.sos-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Emergency Helplines */
+.emergency-helplines {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.helpline-chip {
+  background: #1e293b;
+  color: white;
+  text-decoration: none;
+  padding: 10px 6px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.78rem;
+  font-weight: 600;
+  transition: transform 0.15s;
+}
+
+.helpline-chip:active {
+  transform: scale(0.95);
+}
+
+.helpline-chip .number {
+  color: #38bdf8;
+  font-size: 1.05rem;
+  font-weight: 800;
 }

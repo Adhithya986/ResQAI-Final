@@ -221,35 +221,35 @@ function Dashboard() {
   );
 
   return (
-    <div className="container mt-4">
+    <div className="container mt-3 px-3 pb-5 mb-5">
 
       {/* ================================= */}
       {/* TITLE */}
       {/* ================================= */}
 
-      <h1 className="text-center mb-4">
+      <h1 className="text-center mb-3 fs-2 fw-bold">
         🚨 ResQAI Admin Dashboard
       </h1>
 
       {/* ================================= */}
-      {/* STATISTICS */}
+      {/* STATISTICS (2x2 on Mobile) */}
       {/* ================================= */}
 
-      <div className="row mb-4">
+      <div className="row g-2 g-md-3 mb-4">
 
-        <div className="col-md-3">
-          <div className="card text-center bg-primary text-white">
-            <div className="card-body">
-              <h2>{requests.length}</h2>
-              <p>Total SOS</p>
+        <div className="col-6 col-md-3">
+          <div className="card text-center bg-primary text-white shadow-sm h-100">
+            <div className="card-body py-3">
+              <h2 className="fs-1 fw-bold">{requests.length}</h2>
+              <p className="mb-0 small fw-semibold">Total SOS</p>
             </div>
           </div>
         </div>
 
-        <div className="col-md-3">
-          <div className="card text-center bg-warning">
-            <div className="card-body">
-              <h2>
+        <div className="col-6 col-md-3">
+          <div className="card text-center bg-warning shadow-sm h-100">
+            <div className="card-body py-3">
+              <h2 className="fs-1 fw-bold">
                 {
                   requests.filter(
                     (item) =>
@@ -258,15 +258,15 @@ function Dashboard() {
                 }
               </h2>
 
-              <p>Pending</p>
+              <p className="mb-0 small fw-semibold">Pending</p>
             </div>
           </div>
         </div>
 
-        <div className="col-md-3">
-          <div className="card text-center bg-info text-white">
-            <div className="card-body">
-              <h2>
+        <div className="col-6 col-md-3">
+          <div className="card text-center bg-info text-white shadow-sm h-100">
+            <div className="card-body py-3">
+              <h2 className="fs-1 fw-bold">
                 {
                   requests.filter(
                     (item) =>
@@ -275,15 +275,15 @@ function Dashboard() {
                 }
               </h2>
 
-              <p>Accepted</p>
+              <p className="mb-0 small fw-semibold">Accepted</p>
             </div>
           </div>
         </div>
 
-        <div className="col-md-3">
-          <div className="card text-center bg-success text-white">
-            <div className="card-body">
-              <h2>
+        <div className="col-6 col-md-3">
+          <div className="card text-center bg-success text-white shadow-sm h-100">
+            <div className="card-body py-3">
+              <h2 className="fs-1 fw-bold">
                 {
                   requests.filter(
                     (item) =>
@@ -292,7 +292,7 @@ function Dashboard() {
                 }
               </h2>
 
-              <p>Completed</p>
+              <p className="mb-0 small fw-semibold">Completed</p>
             </div>
           </div>
         </div>
@@ -303,10 +303,10 @@ function Dashboard() {
       {/* SEARCH / FILTER */}
       {/* ================================= */}
 
-      <div className="card mb-4">
-        <div className="card-body">
+      <div className="card mb-4 shadow-sm border-0">
+        <div className="card-body p-3">
 
-          <div className="row">
+          <div className="row g-2">
 
             <div className="col-md-4">
               <input

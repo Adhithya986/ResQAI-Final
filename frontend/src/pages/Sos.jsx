@@ -1,90 +1,160 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import "./Sos.css";
 import { getApiUrl } from "../services/api";
+
+const EMERGENCY_TYPES = [
+  { id: "Flood", label: "Flood", icon: "🌊" },
+  { id: "Fire", label: "Fire Outbreak", icon: "🔥" },
+  { id: "Earthquake", label: "Earthquake", icon: "🌍" },
+  { id: "Accident", label: "Accident", icon: "🚗" },
+  { id: "Medical Emergency", label: "Medical Crisis", icon: "🏥" },
+  { id: "Cyclone / Storm", label: "Severe Storm", icon: "🌪️" },
+];
+
 function Sos() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [emergency, setEmergency] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState(null);
+  const [locLoading, setLocLoading] = useState(false);
   const [status, setStatus] = useState("");
   const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [isListening, setIsListening] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-const recognitionRef = useRef(null);
+  const recognitionRef = useRef(null);
+
+  // Auto-fill from localStorage if user is signed in
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("user");
+      if (stored) {
+        const u = JSON.parse(stored);
+        if (u.name && !name) setName(u.name);
+        if (u.phone && !phone) setPhone(u.phone);
+      }
+    } catch {
+      // Ignore parse errors
+    }
+    // Auto-fetch GPS location on load
+    getLocation();
+  }, []);
+
+  const triggerHaptic = (pattern = 30) => {
+    if (typeof navigator !== "undefined" && navigator.vibrate) {
+      try {
+        navigator.vibrate(pattern);
+      } catch {
+        // Safe fallback
+      }
+    }
+  };
 
   const getLocation = () => {
     if (!navigator.geolocation) {
-      setStatus("Geolocation is not supported.");
+      setStatus("Geolocation is not supported by your mobile browser.");
       return;
     }
 
+    setLocLoading(true);
     navigator.geolocation.getCurrentPosition(
       (position) => {
         setLocation({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
+          latitude: Number(position.coords.latitude.toFixed(6)),
+          longitude: Number(position.coords.longitude.toFixed(6)),
+          accuracy: Math.round(position.coords.accuracy || 0),
         });
-
-
-
-        setStatus("📍 Location Retrieved Successfully");
+        setLocLoading(false);
+        setStatus("📍 Accurate GPS location locked.");
+        triggerHaptic(20);
       },
       (error) => {
-        setStatus(error.message);
-      }
+        setLocLoading(false);
+        setStatus("⚠️ GPS access denied: " + error.message);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
     );
   };
 
+  const handleChipSelect = (typeId) => {
+    setEmergency(typeId);
+    triggerHaptic(30);
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImage(file);
+      setImagePreview(URL.createObjectURL(file));
+      triggerHaptic(25);
+    }
+  };
+
+  const removeImage = () => {
+    setImage(null);
+    setImagePreview(null);
+  };
+
   const startListening = () => {
-  const SpeechRecognition =
-    window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
 
-  if (!SpeechRecognition) {
-    alert("Speech Recognition is not supported in this browser.");
-    return;
-  }
-
-  const recognition = new SpeechRecognition();
-
-  recognition.lang = "en-IN";
-  recognition.continuous = false;
-  recognition.interimResults = false;
-
-  recognitionRef.current = recognition;
-
-  setIsListening(true);
-
-  recognition.start();
-
-  recognition.onresult = (event) => {
-    const transcript = event.results[0][0].transcript;
-
-    setDescription(transcript);
-  };
-
-  recognition.onend = () => {
-    setIsListening(false);
-  };
-
-  recognition.onerror = (event) => {
-    console.error(event.error);
-    setIsListening(false);
-  };
-};
-
-  const sendSOS = async () => {
-    if (!name || !phone || !emergency) {
-      alert("Please fill all required fields.");
+    if (!SpeechRecognition) {
+      alert("Speech Recognition is not supported on this browser.");
       return;
     }
 
-    const formData = new FormData();
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-IN";
+    recognition.continuous = false;
+    recognition.interimResults = false;
 
-    formData.append("name", name);
-    formData.append("phone", phone);
+    recognitionRef.current = recognition;
+    setIsListening(true);
+    triggerHaptic(50);
+
+    recognition.start();
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setDescription((prev) => (prev ? prev + " " + transcript : transcript));
+      triggerHaptic([30, 30]);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.onerror = (event) => {
+      console.error(event.error);
+      setIsListening(false);
+    };
+  };
+
+  const sendSOS = async () => {
+    if (!name.trim()) {
+      alert("Please enter your name.");
+      return;
+    }
+    if (!phone.trim()) {
+      alert("Please enter your contact phone number.");
+      return;
+    }
+    if (!emergency) {
+      alert("Please select the type of emergency.");
+      return;
+    }
+
+    setSubmitting(true);
+    triggerHaptic([100, 50, 100]);
+
+    const formData = new FormData();
+    formData.append("name", name.trim());
+    formData.append("phone", phone.trim());
     formData.append("emergency", emergency);
-    formData.append("description", description);
+    formData.append("description", description.trim());
 
     if (location) {
       formData.append("location", JSON.stringify(location));
@@ -101,119 +171,248 @@ const recognitionRef = useRef(null);
       });
 
       const data = await response.json();
+      setSubmitting(false);
 
-      alert(data.message);
-
-      console.log(data);
-
-      // Reset form
-      setName("");
-      setPhone("");
-      setEmergency("");
-      setDescription("");
-      setLocation(null);
-      setImage(null);
-      setStatus("");
-
+      if (response.ok) {
+        triggerHaptic([150, 100, 200]);
+        alert("🚨 SOS ALERT BROADCASTED!\n\nRescue teams within your vicinity have been alerted with your coordinates.");
+        // Reset form except contact info
+        setEmergency("");
+        setDescription("");
+        setImage(null);
+        setImagePreview(null);
+        setStatus("✅ SOS broadcasted successfully to Rescue Command.");
+      } else {
+        alert(data.message || "Failed to submit SOS.");
+        setStatus("❌ Submission failed: " + (data.message || "Unknown error"));
+      }
     } catch (error) {
       console.error(error);
-      alert("❌ Unable to connect to backend.");
+      setSubmitting(false);
+      alert("❌ Unable to connect to backend server. Try calling local emergency helplines below.");
+      setStatus("❌ Connection failed. Please use direct emergency calling.");
     }
   };
 
   return (
-    <div className="sos-container">
+    <div className="sos-page-wrapper">
+      <div className="sos-card">
+        {/* Header */}
+        <div className="sos-header">
+          <h1>🚨 Emergency SOS</h1>
+          <p>Instant beacon broadcast to nearby rescue units</p>
+        </div>
 
-      <h2>🚨 Emergency SOS</h2>
-
-      <input
-        type="text"
-        placeholder="Full Name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
-
-      <input
-        type="text"
-        placeholder="Phone Number"
-        value={phone}
-        onChange={(e) => setPhone(e.target.value)}
-      />
-
-      <select
-        value={emergency}
-        onChange={(e) => setEmergency(e.target.value)}
-      >
-        <option value="">Select Emergency</option>
-        <option>Flood</option>
-        <option>Fire</option>
-        <option>Earthquake</option>
-        <option>Accident</option>
-        <option>Medical Emergency</option>
-      </select>
-
-      <textarea
-        rows="5"
-        placeholder="Describe your emergency..."
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-      />
-<div style={{ marginTop: "10px", marginBottom: "20px" }}>
-  <button
-    type="button"
-    onClick={startListening}
-    className={isListening ? "location-btn" : "sos-button"}
-  >
-    {isListening ? "🎙 Listening..." : "🎤 Voice SOS"}
-  </button>
-</div>
-      <h4>📷 Upload Disaster Image</h4>
-
-      <input
-        type="file"
-        accept="image/*"
-        onChange={(e) => setImage(e.target.files[0])}
-      />
-
-      {image && (
-        <div style={{ marginTop: "15px" }}>
-          <img
-            src={URL.createObjectURL(image)}
-            alt="Preview"
-            width="300"
+        {/* GPS Location Status Pill */}
+        <div
+          className={`gps-banner ${
+            locLoading ? "loading" : location ? "" : "error"
+          }`}
+        >
+          <div className="gps-info">
+            <span style={{ fontSize: "1.2rem" }}>
+              {locLoading ? "📡" : location ? "📍" : "⚠️"}
+            </span>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: "0.85rem", color: "#0f172a" }}>
+                {locLoading
+                  ? "Locating your GPS..."
+                  : location
+                  ? `GPS Locked (±${location.accuracy}m)`
+                  : "GPS Location Needed"}
+              </div>
+              <div style={{ fontSize: "0.75rem", color: "#64748b" }}>
+                {location
+                  ? `${location.latitude}, ${location.longitude}`
+                  : "Tap refresh to pinpoint emergency location"}
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={getLocation}
             style={{
-              borderRadius: "10px",
-              border: "2px solid #ddd",
+              background: "white",
+              border: "1px solid #cbd5e1",
+              borderRadius: "8px",
+              padding: "6px 10px",
+              fontSize: "0.75rem",
+              fontWeight: 600,
+              cursor: "pointer",
             }}
+          >
+            {locLoading ? "Locating..." : "🔄 Refresh"}
+          </button>
+        </div>
+
+        {/* Quick Emergency Type Selection (1-tap Mobile Chips) */}
+        <div style={{ marginBottom: "16px" }}>
+          <label style={{ display: "block", fontWeight: 700, fontSize: "0.88rem", color: "#334155", marginBottom: "8px" }}>
+            Select Emergency Type *
+          </label>
+          <div className="emergency-grid">
+            {EMERGENCY_TYPES.map((t) => (
+              <button
+                type="button"
+                key={t.id}
+                className={`emergency-chip ${emergency === t.id ? "selected" : ""}`}
+                onClick={() => handleChipSelect(t.id)}
+              >
+                <span className="icon">{t.icon}</span>
+                <span className="label">{t.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Contact Fields */}
+        <div className="sos-input-group">
+          <label htmlFor="sos-name">Full Name *</label>
+          <input
+            id="sos-name"
+            className="sos-input"
+            type="text"
+            placeholder="e.g. Rahul Sharma"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
           />
         </div>
-      )}
 
-      <br />
+        <div className="sos-input-group">
+          <label htmlFor="sos-phone">Phone Number (to reach you) *</label>
+          <input
+            id="sos-phone"
+            className="sos-input"
+            type="tel"
+            inputMode="tel"
+            placeholder="e.g. 9876543210"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+          />
+        </div>
 
-      <button
-        className="location-btn"
-        onClick={getLocation}
-      >
-        📍 Get My Location
-      </button>
+        {/* Emergency Description & Voice SOS */}
+        <div className="sos-input-group">
+          <label htmlFor="sos-desc">Situation Details / Landmark (Optional)</label>
+          <textarea
+            id="sos-desc"
+            className="sos-input"
+            rows="3"
+            placeholder="e.g. Water level rising to 1st floor, 3 people stranded..."
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
 
-      {location && (
-        <>
-          <p><strong>Latitude:</strong> {location.latitude}</p>
-          <p><strong>Longitude:</strong> {location.longitude}</p>
-        </>
-      )}
+          <button
+            type="button"
+            className={`voice-btn ${isListening ? "listening" : ""}`}
+            onClick={startListening}
+          >
+            <span>{isListening ? "🔴" : "🎤"}</span>
+            <span>{isListening ? "Listening... Speak now" : "Speak Situation (Voice SOS)"}</span>
+          </button>
+        </div>
 
-      <button
-        className="sos-button"
-        onClick={sendSOS}
-      >
-        🚨 SEND SOS
-      </button>
+        {/* Camera / Photo Upload */}
+        <div className="sos-input-group">
+          <label>Snap / Upload Scene Photo (Optional)</label>
+          {!imagePreview ? (
+            <label className="camera-upload-box">
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handleImageChange}
+              />
+              <div style={{ fontSize: "2rem", marginBottom: "4px" }}>📸</div>
+              <div style={{ fontWeight: 600, fontSize: "0.9rem", color: "#1e293b" }}>
+                Tap to open camera or gallery
+              </div>
+              <div style={{ fontSize: "0.75rem", color: "#64748b" }}>
+                Helps rescue teams assess the situation
+              </div>
+            </label>
+          ) : (
+            <div style={{ position: "relative", textAlign: "center" }}>
+              <img
+                src={imagePreview}
+                alt="Emergency Scene"
+                style={{
+                  width: "100%",
+                  maxHeight: "220px",
+                  objectFit: "cover",
+                  borderRadius: "12px",
+                  border: "2px solid #3b82f6",
+                }}
+              />
+              <button
+                type="button"
+                onClick={removeImage}
+                style={{
+                  position: "absolute",
+                  top: "10px",
+                  right: "10px",
+                  background: "rgba(0,0,0,0.7)",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "50%",
+                  width: "32px",
+                  height: "32px",
+                  cursor: "pointer",
+                  fontSize: "1rem",
+                }}
+              >
+                ✕
+              </button>
+            </div>
+          )}
+        </div>
 
-      <h3>{status}</h3>
+        {/* Send SOS Trigger */}
+        <button
+          type="button"
+          className="sos-submit-btn"
+          onClick={sendSOS}
+          disabled={submitting}
+        >
+          <span>{submitting ? "⏳" : "🚨"}</span>
+          <span>{submitting ? "BROADCASTING SOS..." : "BROADCAST EMERGENCY SOS"}</span>
+        </button>
 
+        {status && (
+          <div
+            style={{
+              marginTop: "12px",
+              padding: "10px 14px",
+              borderRadius: "8px",
+              fontSize: "0.85rem",
+              fontWeight: 600,
+              textAlign: "center",
+              background: status.includes("✅") ? "#f0fdf4" : status.includes("📍") ? "#eff6ff" : "#fef2f2",
+              color: status.includes("✅") ? "#166534" : status.includes("📍") ? "#1e40af" : "#991b1b",
+              border: "1px solid currentColor",
+            }}
+          >
+            {status}
+          </div>
+        )}
+
+        {/* 1-Tap Emergency Helplines for Instant Dialing */}
+        <div className="emergency-helplines">
+          <a href="tel:112" className="helpline-chip">
+            <span>National Help</span>
+            <span className="number">📞 112</span>
+          </a>
+          <a href="tel:108" className="helpline-chip">
+            <span>Ambulance</span>
+            <span className="number">🚑 108</span>
+          </a>
+          <a href="tel:101" className="helpline-chip">
+            <span>Fire Brigade</span>
+            <span className="number">🚒 101</span>
+          </a>
+        </div>
+      </div>
     </div>
   );
 }
